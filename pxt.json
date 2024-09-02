@@ -9,7 +9,8 @@
         "main.blocks",
         "README.md",
         "YM3.ts",
-        "main.ts"
+        "main.ts",
+        "sendBuffer.asm"
     ],
     "testFiles": [],
     "targetVersions": {
