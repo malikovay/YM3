@@ -6,9 +6,9 @@
     },
     "files": [
         "main.blocks",
-        "main.ts",
         "README.md",
-        "YM3.ts"
+        "YM3.ts",
+        "main.ts"
     ],
     "testFiles": [],
     "targetVersions": {
