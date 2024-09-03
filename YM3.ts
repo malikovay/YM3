@@ -195,7 +195,7 @@ namespace YM3_motor {
         if (index == 3) y = servo4;
         else y = servo8;
         let x = Math.abs(angle - y) * 4;
-        if (x < 200) x = 200;
+        //if (x < 200) x = 200;
         basic.pause(x); //пауза пропорциональна разнице прошлого угла и текущего
         if (index == 3) servo4 = angle;
         else servo8 = angle;
