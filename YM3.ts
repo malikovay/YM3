@@ -1560,6 +1560,7 @@ namespace YM3_I2C {
             default:
                 return false;
         }
+        return false;
     }
 
     //% block="Индексированный цвет"
