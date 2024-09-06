@@ -1528,39 +1528,54 @@ namespace YM3_I2C {
             case enGetIndex.White: {
                 if (val_red > 122 && val_green > 122 && val_blue > 122)
                     return true;
+                else
+                    return false;
             }
             case enGetIndex.Black: {
                 if (val_red <= 122 && val_green <= 122 && val_blue <= 122)
                     return true;
+                else
+                    return false;
             }
             case enGetIndex.Red: {
                 if (val_red > 122 && val_green <= 122 && val_blue <= 122)
                     return true;
+                else
+                    return false;
             }
             case enGetIndex.Green: {
                 if (val_red <= 122 && val_green > 122 && val_blue <= 122)
                     return true;
+                else
+                    return false;
             }
             case enGetIndex.Blue: {
                 if (val_red <= 122 && val_green <= 122 && val_blue > 122)
                     return true;
+                else
+                    return false;
             }
             case enGetIndex.Yellow: {
                 if (val_red > 122 && val_green > 122 && val_blue <= 122)
                     return true;
+                else
+                    return false;
             }
             case enGetIndex.Light_blue: {
                 if (val_red <= 122 && val_green > 122 && val_blue > 122)
                     return true;
+                else
+                    return false;
             }
             case enGetIndex.Purple: {
                 if (val_red > 122 && val_green <= 122 && val_blue > 122)
                     return true;
+                else
+                    return false;
             }
             default:
                 return false;
         }
-        return false;
     }
 
     //% block="Индексированный цвет"
