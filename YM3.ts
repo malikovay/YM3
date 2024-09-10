@@ -204,7 +204,7 @@ namespace YM3_motor {
     //% block="Мотор по мощности|%index|%speed\\%" blockGap=8
     //% weight=99
     //% group="Мотор"
-    //% speed.min=-100 speed.max=100 speed.defl=0 speed.shadow="speedPicker"
+    //% speed.min=-100 speed.max=100 speed.defl=75 speed.shadow="speedPicker"
     //% inlineInputMode=inline
     export function MotorRun(index: enMotorsAll, speed: number): void {
         if (!initialized) {
@@ -260,7 +260,8 @@ namespace YM3_motor {
     //% block="Мотор по времени|%index|%speed\\%|%time\\c|%lock" blockGap=8
     //% weight=98
     //% group="Мотор"
-    //% speed.min=-100 speed.max=100 speed.defl=0 speed.shadow="speedPicker"
+    //% speed.min=-100 speed.max=100 speed.defl=75 speed.shadow="speedPicker"
+    //% time.defl=1
     //% inlineInputMode=inline
     export function MotorRunTime(index: enMotorsAll, speed: number, time: number, lock: enLock): void {
         if (speed > 100) speed = 100;
@@ -275,7 +276,8 @@ namespace YM3_motor {
     //% block="Мотор по энкодеру|%index|%speed\\%|%rotations\\↻|%degrees\\°|%mode|%lock" blockGap=8
     //% weight=97
     //% group="Мотор"
-    //% speed.min=-100 speed.max=100 speed.defl=0 speed.shadow="speedPicker"
+    //% speed.min=-100 speed.max=100 speed.defl=75 speed.shadow="speedPicker"
+    //% rotations.defl=1 degrees.defl=360
     //% inlineInputMode=inline
     export function MotorRunRD(index: enMotors2, speed: number, rotations: number, degrees: number, mode: enMode, lock: enLock): void {
         if (speed > 100) speed = 100;
@@ -353,7 +355,7 @@ namespace YM3_motor {
     //% block="Рулевое управление по мощности|%motor|%steer\\↑|%speed\\%" blockGap=8
     //% weight=92
     //% steer.shadow=speedPicker steer.min=-100 steer.max=100 steer.defl=0
-    //% speed.shadow=speedPicker speed.min=-100 speed.max=100 speed.defl=0
+    //% speed.shadow=speedPicker speed.min=-100 speed.max=100 speed.defl=75
     //% inlineInputMode=inline
     //% group="Рулевое управление моторами"
     export function MotorRunSteer(motor: enMotorsDual, steer: number, speed: number): void {
@@ -394,7 +396,8 @@ namespace YM3_motor {
     //% block="Рулевое управление по времени|%motor|%steer\\↑|%speed\\%|%time\\c|%lock" blockGap=8
     //% weight=91
     //% steer.shadow=speedPicker steer.min=-100 steer.max=100 steer.defl=0
-    //% speed.shadow=speedPicker speed.min=-100 speed.max=100 speed.defl=0
+    //% speed.shadow=speedPicker speed.min=-100 speed.max=100 speed.defl=75
+    //% time.defl=1
     //% inlineInputMode=inline
     //% group="Рулевое управление моторами"
     export function MotorRunSteerTime(motor: enMotorsDual, steer: number, speed: number, time: number, lock: enLock): void {
@@ -440,7 +443,8 @@ namespace YM3_motor {
     //% block="Рулевое управление по энкодеру М1М2|%steer\\↑|%speed\\%|%rotations\\↻|%degrees\\°|%mode|%lock" blockGap=8
     //% weight=90
     //% steer.shadow=speedPicker steer.min=-100 steer.max=100 steer.defl=0
-    //% speed.shadow=speedPicker speed.min=-100 speed.max=100 speed.defl=0
+    //% speed.shadow=speedPicker speed.min=-100 speed.max=100 speed.defl=75
+    //% rotations.defl=1 degrees.defl=360
     //% inlineInputMode=inline
     //% group="Рулевое управление моторами"
     export function MotorRunSteerRD(steer: number, speed: number, rotations: number, degrees: number, mode: enMode, lock: enLock): void {
@@ -525,8 +529,8 @@ namespace YM3_motor {
 
     //% block="Танковое управление по мощности|%motor|%speed1\\%|%speed2\\%" blockGap=8
     //% weight=89
-    //% speed1.shadow=speedPicker speed1.min=-100 speed1.max=100 speed1.defl=0
-    //% speed2.shadow=speedPicker speed2.min=-100 speed2.max=100 speed2.defl=0
+    //% speed1.shadow=speedPicker speed1.min=-100 speed1.max=100 speed1.defl=75
+    //% speed2.shadow=speedPicker speed2.min=-100 speed2.max=100 speed2.defl=75
     //% inlineInputMode=inline
     //% group="Танковое управление моторами"
     export function MotorRunTank(motor: enMotorsDual, speed1: number, speed2: number): void {
@@ -556,8 +560,9 @@ namespace YM3_motor {
 
     //% block="Танковое управление по времени|%motor|%speed1\\%|%speed2\\%|%time\\c|%lock" blockGap=8
     //% weight=88
-    //% speed1.shadow=speedPicker speed1.min=-100 speed1.max=100 speed1.defl=0
-    //% speed2.shadow=speedPicker speed2.min=-100 speed2.max=100 speed2.defl=0
+    //% speed1.shadow=speedPicker speed1.min=-100 speed1.max=100 speed1.defl=75
+    //% speed2.shadow=speedPicker speed2.min=-100 speed2.max=100 speed2.defl=75
+    //% time.defl=1
     //% inlineInputMode=inline
     //% group="Танковое управление моторами"
     export function MotorRunTankTime(motor: enMotorsDual, speed1: number, speed2: number, time: number, lock: enLock): void {
@@ -592,8 +597,9 @@ namespace YM3_motor {
 
     //% block="Танковое управление по энкодеру М1М2|%speed1\\%|%speed2\\%|%rotations\\↻|%degrees\\°|%mode|%lock" blockGap=8
     //% weight=87
-    //% speed1.shadow=speedPicker speed1.min=-100 speed1.max=100 speed1.defl=0
-    //% speed2.shadow=speedPicker speed2.min=-100 speed2.max=100 speed2.defl=0
+    //% speed1.shadow=speedPicker speed1.min=-100 speed1.max=100 speed1.defl=75
+    //% speed2.shadow=speedPicker speed2.min=-100 speed2.max=100 speed2.defl=75
+    //% rotations.defl=1 degrees.defl=360
     //% inlineInputMode=inline
     //% group="Танковое управление моторами"
     export function MotorRunTankRD(speed1: number, speed2: number, rotations: number, degrees: number, mode: enMode, lock: enLock): void {
