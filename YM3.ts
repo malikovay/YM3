@@ -23,6 +23,9 @@ namespace YM3_motor {
     let encoderM1Time = 0
     let encoderM2Time = 0
 
+    let initServo4 = 0
+    let initServo8 = 0
+
     let servo4 = 0
     let servo8 = 0
 
@@ -195,7 +198,19 @@ namespace YM3_motor {
         if (index == 3) y = servo4;
         else y = servo8;
         let x = Math.abs(angle - y) * 4;
-        //if (x < 200) x = 200;
+        
+        if (index == 3) {
+            if (!initServo4) {
+                initServo4 = 1;
+                x = 360 * 4;
+            }
+        } else {
+            if (!initServo8) {
+                initServo8 = 1;
+                x = 360 * 4;
+            }
+        }
+
         basic.pause(x); //пауза пропорциональна разнице прошлого угла и текущего
         if (index == 3) servo4 = angle;
         else servo8 = angle;
