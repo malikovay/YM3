@@ -11,6 +11,12 @@
         "sendBuffer.asm"
     ],
     "testFiles": [],
-
+    "targetVersions": {
+        "target": "7.0.40",
+        "targetId": "microbit"
+    },
+    "supportedTargets": [
+        "microbit"
+    ],
     "preferredEditor": "tsprj"
 }
