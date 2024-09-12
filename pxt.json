@@ -13,7 +13,6 @@
     "testFiles": [],
     "targetVersions": {
         "target": "7.0.40",
-        "pxt": "9.0.12",
         "targetId": "microbit"
     },
     "supportedTargets": [
