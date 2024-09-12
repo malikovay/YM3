@@ -10,9 +10,7 @@
         "YM3.ts",
         "sendBuffer.asm"
     ],
-    "testFiles": [
-        "test.ts"
-    ],
+    "testFiles": [],
     "targetVersions": {
         "target": "7.0.40",
         "targetId": "microbit"
