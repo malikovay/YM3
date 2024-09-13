@@ -1,5 +1,5 @@
 /*
-Copyright (C): 2024, SkillCraft
+Copyright (C): 2024, YM3
 */
 
 //% color="#cd4896" weight=40 icon="\uf085" //#9a1564
