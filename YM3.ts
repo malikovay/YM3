@@ -916,7 +916,7 @@ namespace YM3_module {
 
         value2 = pins.analogReadPin(AnalogPin.P2);
 
-        return Math.round((value1 - value2) / 1023 * 100);
+        return Math.round((value1 - value2) / 1023 * 100) + 70;
     }
 
     //% block="Цифровой ИК модуль|%index"
