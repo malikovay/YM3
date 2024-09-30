@@ -905,6 +905,7 @@ namespace YM3_module {
     //% block="Разница ИК"
     //% weight=88
     export function IR_acDif(): number {
+        let value;
         let value1;
         let value2;
 
@@ -916,7 +917,9 @@ namespace YM3_module {
 
         value2 = pins.analogReadPin(AnalogPin.P2);
 
-        return Math.round((value1 - value2) / 1023 * 100) + 70;
+        value = value1 - value2;
+
+        return Math.round((1023 - value) / 1024 * 100) - 70;
     }
 
     //% block="Цифровой ИК модуль|%index"
