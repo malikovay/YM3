@@ -1689,8 +1689,7 @@ namespace YM3_RGB {
         }
 
         clear(): void {
-            const stride = this._mode === PixelMode.RGBW ? 4 : 3;
-            this.buf.fill(0, this.start * stride, this._length * stride);
+            this.buf.fill(0, this.start * 3, this._length * 3);
             this.show();
         }
 
@@ -1700,8 +1699,7 @@ namespace YM3_RGB {
 
         rotate(offset: number = 1): void {
             offset = offset >> 0;
-            const stride = this._mode === PixelMode.RGBW ? 4 : 3;
-            this.buf.rotate(-offset * stride, this.start * stride, this._length * stride)
+            this.buf.rotate(-offset * 3, this.start * 3, this._length * 3)
             this.show();
         }
 
@@ -1734,9 +1732,8 @@ namespace YM3_RGB {
                 blue = (blue * br) >> 8;
             }
             const end = this.start + this._length;
-            const stride = this._mode === PixelMode.RGBW ? 4 : 3;
             for (let i = this.start; i < end; ++i) {
-                this.setBufferRGB(i * stride, red, green, blue)
+                this.setBufferRGB(i * 3, red, green, blue)
             }
         }
         private setAllW(white: number) {
@@ -1759,8 +1756,7 @@ namespace YM3_RGB {
                 || pixeloffset >= this._length)
                 return;
 
-            let stride = this._mode === PixelMode.RGBW ? 4 : 3;
-            pixeloffset = (pixeloffset + this.start) * stride;
+            pixeloffset = (pixeloffset + this.start) * 3;
 
             let red = unpackR(rgb);
             let green = unpackG(rgb);
@@ -1834,7 +1830,6 @@ namespace YM3_RGB {
     //% weight=59
     export function setBrightness(brightness: number): void {
         strip.setBrightness(brightness);
-        strip.show();
     }
 
     //% block="Вращение с %offset"
