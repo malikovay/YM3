@@ -1076,6 +1076,7 @@ namespace YM3_I2C {
         }
         else
             digit(Math.idiv(num, 1000) % 10, 0)
+
         digit(num % 10, 3)
         digit(Math.idiv(num, 10) % 10, 2)
         digit(Math.idiv(num, 100) % 10, 1)
@@ -1085,7 +1086,7 @@ namespace YM3_I2C {
     //% block="Показать строку %str"
     //% weight=93 blockGap=8
     //% group="Индикатор"
-    export function showSring(str: string) {
+    export function showString(str: string) {
         for (let i = 0; i < 4; i++) {
             let a = str.charCodeAt(i) & 0x7F;
             let dot = str.charCodeAt(i) & 0x80;
@@ -1101,7 +1102,7 @@ namespace YM3_I2C {
 
     function displayRuning(str: string, del: number): number {
         iPosition = str;
-        showSring(iPosition);
+        showString(iPosition);
         basic.pause(del);
         let l = iPosition.length;
 
@@ -1114,7 +1115,7 @@ namespace YM3_I2C {
             return 0;
         else {
             iPosition = iPosition.substr(1, iPosition.length - 1);
-            showSring(iPosition);
+            showString(iPosition);
             return (iPosition.length - 4);
         }
     }
@@ -1122,7 +1123,7 @@ namespace YM3_I2C {
     //% block="Прокрутка %str | пауза (мс) %del"
     //% weight=90 blockGap=8
     //% group="Индикатор"
-    export function showRunging(str: string, del: number) {
+    export function showRuning(str: string, del: number) {
         if (displayRuning(str, del)) {
             while (displayRunningShift()) {
                 basic.pause(del);
@@ -1130,12 +1131,8 @@ namespace YM3_I2C {
         }
     }
 
-    /**
-     * show a number in hex format
-     * @param num is number will be shown, eg: 123
-     */
     /*
-    //% blockId="TM650_SHOW_HEX_NUMBER" block="show hex number %num"
+    //% block="show hex number %num"
     //% weight=89 blockGap=8
     export function showHex(num: number) {
         if (num < 0) {
@@ -1150,13 +1147,8 @@ namespace YM3_I2C {
     }
     */
 
-    /**
-     * show Dot Point in given position
-     * @param bit is positiion, eg: 0
-     * @param show is true/false, eg: true
-     */
     /*
-    //% blockId="TM650_SHOW_DP" block="show dot point %bit|show %num"
+    //% block="show dot point %bit|show %num"
     //% weight=88 blockGap=8
     export function showDpAt(bit: number, show: boolean) {
         if (show) dat(bit, dbuf[bit % 4] | 0x80)
@@ -1517,7 +1509,7 @@ namespace YM3_I2C {
     //% block="Значение цвета %value"
     //% blockGap=8
     //% weight=60
-    //%group="Модуль распознавания цвета"
+    //% group="Модуль распознавания цвета"
     export function GetRGBValue(value: enGetRGB): number {
         if (!initialized) {
             initColorI2C();
@@ -1668,19 +1660,6 @@ namespace YM3_RGB {
     //% shim=sendBufferAsm
     function sendBuffer(buf: Buffer, pin: DigitalPin) {
     }
-
-    /*
-    let yahRGB: YM3_RGB.RGB4;
-
-    //% block="RGB4"
-    //% weight=100
-    export function RGB_Program(): YM3_RGB.RGB4 {
-        if (!yahRGB) {
-            yahRGB = YM3_RGB.create(DigitalPin.P12, 4, PixelMode.RGB);
-        }
-        return yahRGB;
-    }
-    */
 
     export class RGB4 {
         buf: Buffer;
