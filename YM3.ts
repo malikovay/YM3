@@ -1696,7 +1696,7 @@ namespace YM3_RGB {
 
         setBrightness(brightness: number): void {
             this.brightness = brightness & 0xff;
-            this.show();
+            //this.show();
         }
 
         rotate(offset: number = 1): void {
