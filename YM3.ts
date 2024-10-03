@@ -1673,45 +1673,32 @@ namespace YM3_RGB {
         _matrixChain: number; // the connection type of matrix chain
         _matrixRotation: number; // the rotation type of matrix
 
-        //% block="%RGB4 Все светодиоды|%rgb=neopixel_colors"
-        //% weight=95 blockGap=8
         showColor(rgb: number) {
             rgb = rgb >> 0;
             this.setAllRGB(rgb);
             this.show();
         }
 
-        //% blockId="neopixel_set_pixel_color" block="%RGB4|светодиод № %pixeloffset|%rgb=neopixel_colors"
-        //% blockGap=8
-        //% weight=80
         setPixelColor(pixeloffset: number, rgb: number): void {
             this.setPixelRGB(pixeloffset >> 0, rgb >> 0);
             this.show();
         }
 
-        //% blockId="neopixel_show" block="%RGB4|отобразить" blockGap=8
-        //% weight=79
-        //% blockHidden=true
         show() {
             sendBuffer(this.buf, this.pin);
         }
 
-        //% blockId="neopixel_clear" block="%RGB4|выключить все"
-        //% weight=76
         clear(): void {
             const stride = this._mode === PixelMode.RGBW ? 4 : 3;
             this.buf.fill(0, this.start * stride, this._length * stride);
             this.show();
         }
 
-        //% blockId="neopixel_set_brightness" block="%RGB4|яркость %brightness 0-255" blockGap=8
-        //% weight=59
         setBrightness(brightness: number): void {
             this.brightness = brightness & 0xff;
+            this.show();
         }
 
-        //% blockId="neopixel_rotate" block="%RGB4|вращение с %offset" blockGap=8
-        //% weight=39
         rotate(offset: number = 1): void {
             offset = offset >> 0;
             const stride = this._mode === PixelMode.RGBW ? 4 : 3;
@@ -1719,7 +1706,6 @@ namespace YM3_RGB {
             this.show();
         }
 
-        //% weight=10
         setPin(pin: DigitalPin): void {
             this.pin = pin;
             pins.digitalWritePin(this.pin, 0);
@@ -1808,33 +1794,64 @@ namespace YM3_RGB {
         }
     }
 
-    //% blockId="neopixel_create" block="RGB4 на %pin|с %numleds|светодиодами в %mode"
+    //% block="Инициализация светодиодов"
     //% weight=101 blockGap=8
-    //% trackArgs=0,2
-    //% blockSetVariable=RGB4
-    //% pin.defl=DigitalPin.P12
-    //% numleds.defl=4
-    export function create(pin: DigitalPin, numleds: number, mode: PixelMode): RGB4 {
-        let strip = new RGB4();
-        let stride = mode === PixelMode.RGBW ? 4 : 3;
-        strip.buf = pins.createBuffer(numleds * stride);
+    export function create(): void {
+        strip = new RGB4();
+        strip.buf = pins.createBuffer(12);
         strip.start = 0;
-        strip._length = numleds;
-        strip._mode = mode;
+        strip._length = 4;
+        strip._mode = PixelMode.RGB;
         strip._matrixWidth = 0;
-        strip.setBrightness(255)
-        strip.setPin(pin)
-        return strip;
+        strip.setBrightness(255);
+        strip.setPin(DigitalPin.P12);
+    }
+
+    let strip: RGB4;
+
+    //% block="Все светодиоды %rgb"
+    //% blockGap=8
+    //% weight=95
+    export function showColor(rgb: PixelColors) {
+        strip.showColor(rgb);
+    }
+
+    //% block="Светодиод № %pixeloffset|%rgb"
+    //% blockGap=8
+    //% weight=80
+    export function setPixelColor(pixeloffset: number, rgb: PixelColors): void {
+        strip.setPixelColor(pixeloffset, rgb);
+    }
+
+    //% block="Выключить все"
+    //% blockGap=8
+    //% weight=76
+    export function clear(): void {
+        strip.clear();
+    }
+
+    //% block="Яркость %brightness 0-255"
+    //% blockGap=8
+    //% weight=59
+    export function setBrightness(brightness: number): void {
+        strip.setBrightness(brightness);
+    }
+
+    //% block="Вращение с %offset"
+    //% blockGap=8
+    //% weight=39
+    export function rotate(offset: number = 1): void {
+        strip.rotate(offset);
     }
 
     //% weight=1
-    //% blockId="neopixel_rgb" block="R %red|G %green|B %blue"
+    //% block="R %red|G %green|B %blue"
     export function rgb(red: number, green: number, blue: number): number {
         return packRGB(red, green, blue);
     }
 
     //% weight=2 blockGap=8
-    //% blockId="neopixel_colors" block="%color"
+    //% block="%color"
     //% blockHidden=true
     export function colors(color: PixelColors): number {
         return color;
