@@ -474,6 +474,8 @@ namespace YM3_motor {
 
         let enc = 0;
 
+        let steer_ = 0;
+
         encoderM1 = 0; // если нужно непрерывно считать энкодеры, то это закомментировать
         encoderM2 = 0;
 
@@ -500,7 +502,7 @@ namespace YM3_motor {
             enc += Math.abs(rotations) * 360 + Math.abs(degrees);
         }
 
-        if (steer >= 0) {
+        if (steer > 0) {
             initEncoder(motor1);
             MotorRun(motor1, speed);
             if (speed >= 0)
@@ -518,7 +520,7 @@ namespace YM3_motor {
                 while (enc > (encoderM1 + speed / 4)) { basic.pause(1); }
             }
             encoderOff(motor1); // если нужно непрерывно считать энкодеры, то это закомментировать
-        } else {
+        } else if (steer < 0) {
             initEncoder(motor2);
             MotorRun(motor2, speed);
             if (speed >= 0)
@@ -536,6 +538,37 @@ namespace YM3_motor {
                 while (enc > (encoderM2 + speed / 4)) { basic.pause(1); }
             }
             encoderOff(motor2); // если нужно непрерывно считать энкодеры, то это закомментировать
+        } else {
+            initEncoder(motor1);
+            initEncoder(motor2);
+            MotorRun(motor1, speed);
+            MotorRun(motor2, speed);
+
+            if (speed < 0) {
+                enc *= -1;
+                enc += encoderM2;
+                while (enc < (encoderM1 + speed / 4)) {
+                    steer_ = encoderM1 - encoderM2;
+                    if (steer_ < 0)
+                        MotorRun(motor2, speed - steer_ * 5);
+                    else
+                        MotorRun(motor1, speed + steer_ * 5);
+                    basic.pause(20);
+                }
+            }
+            else {
+                enc += encoderM2;
+                while (enc > (encoderM1 + speed / 4)) {
+                    steer_ = encoderM1 - encoderM2;
+                    if (steer_ < 0)
+                        MotorRun(motor2, speed + steer_ * 5);
+                    else
+                        MotorRun(motor1, speed - steer_ * 5);
+                    basic.pause(20);
+                }
+            }
+            encoderOff(motor1); // если нужно непрерывно считать энкодеры, то это закомментировать
+            encoderOff(motor2);
         }
 
         if (lock == 1) MotorLock(1, 1); //1 - это М1М2
