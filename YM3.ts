@@ -1696,7 +1696,6 @@ namespace YM3_RGB {
 
         setBrightness(brightness: number): void {
             this.brightness = brightness & 0xff;
-            //this.show();
         }
 
         rotate(offset: number = 1): void {
@@ -1835,6 +1834,7 @@ namespace YM3_RGB {
     //% weight=59
     export function setBrightness(brightness: number): void {
         strip.setBrightness(brightness);
+        strip.show();
     }
 
     //% block="Вращение с %offset"
