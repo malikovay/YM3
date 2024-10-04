@@ -546,25 +546,35 @@ namespace YM3_motor {
 
             if (speed < 0) {
                 enc *= -1;
-                enc += encoderM2;
+                enc += encoderM1;
                 while (enc < (encoderM1 + speed / 4)) {
                     steer_ = encoderM1 - encoderM2;
-                    if (steer_ < 0)
-                        MotorRun(motor2, speed - steer_ * 5);
-                    else
-                        MotorRun(motor1, speed + steer_ * 5);
-                    basic.pause(20);
+                    if (steer_ < 0) {
+                        MotorRun(motor2, speed - steer_ * 1);
+                        MotorRun(motor1, speed);
+                    }
+                    else {
+                        MotorRun(motor1, speed + steer_ * 1);
+                        MotorRun(motor2, speed);
+                    }
+                    basic.pause(5);
                 }
             }
             else {
-                enc += encoderM2;
+                enc += encoderM1;
                 while (enc > (encoderM1 + speed / 4)) {
                     steer_ = encoderM1 - encoderM2;
-                    if (steer_ < 0)
-                        MotorRun(motor2, speed + steer_ * 5);
-                    else
-                        MotorRun(motor1, speed - steer_ * 5);
-                    basic.pause(20);
+                    if (steer_ < 0) {
+                        MotorRun(motor2, speed + steer_ * 2);
+                        MotorRun(motor1, speed);
+                    }
+                    else {
+                        MotorRun(motor1, speed - steer_ * 2);
+                        MotorRun(motor2, speed);
+                    }
+
+                    YM3_I2C.showNumber(steer_);
+                    basic.pause(5);
                 }
             }
             encoderOff(motor1); // если нужно непрерывно считать энкодеры, то это закомментировать
@@ -970,18 +980,18 @@ namespace YM3_module {
         else { return false; }
     }
 
-    //% block="Аналоговый джойстик|%index|%value"
+    //% block="Аналоговый джойстик|%value"
     //% weight=80
     export function Rocker_ac(value: enRocker2): number {
 
-        let x = Math.round((pins.analogReadPin(AnalogPin.P1) - 512) / 1024 * 100);
-        let y = Math.round((pins.analogReadPin(AnalogPin.P2) - 512) / 1024 * 100);
+        let x = Math.round((pins.analogReadPin(AnalogPin.P1) - 512) / 512 * 100);
+        let y = Math.round((pins.analogReadPin(AnalogPin.P2) - 512) / 512 * 100);
 
         if (value == 1) { return x; }
         else { return y; }
     }
 
-    //% block="Цифровой джойстик|%index|%value"
+    //% block="Цифровой джойстик|%value"
     //% weight=79
     export function Rocker(value: enRocker): boolean {
 
@@ -1858,14 +1868,14 @@ namespace YM3_RGB {
         strip.clear();
     }
 
-    //% block="Яркость %brightness 0-255"
+    //% block="Яркость %brightness 0-100"
     //% blockGap=8
     //% weight=59
     export function setBrightness(brightness: number): void {
-        strip.setBrightness(brightness);
+        strip.setBrightness(brightness*2.55);
     }
 
-    //% block="Вращение с %offset"
+    //% block="Вращение на %offset"
     //% blockGap=8
     //% weight=39
     export function rotate(offset: number = 1): void {
