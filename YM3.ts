@@ -1394,12 +1394,16 @@ namespace YM3_I2C {
     //% weight=70 blockGap=8
     //% group="Модуль распознавания жестов"
     export function GestureInit(): void {
-        while (!gestureInit) {
-            if (GestureReadReg(0) == 0x20)
+        for (let i = 0; i <= 2;i++) {
+            if (GestureReadReg(0) == 0x20) {
                 gestureInit = 1;
+                break;
+            }
             else
-                basic.pause(500);
+                basic.pause(500); 
         }
+        if (!gestureInit)
+            return;
 
         for (let i = 0; i < Init_Register_Array.length; i++)
             GestureWriteReg(Init_Register_Array[i][0], Init_Register_Array[i][1]);
