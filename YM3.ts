@@ -502,7 +502,7 @@ namespace YM3_motor {
             enc += Math.abs(rotations) * 360 + Math.abs(degrees);
         }
 
-        if (steer > 0) {
+        if (steer >= 0) {
             initEncoder(motor1);
             MotorRun(motor1, speed);
             if (speed >= 0)
@@ -513,11 +513,11 @@ namespace YM3_motor {
             if (speed < 0) {
                 enc *= -1;
                 enc += encoderM1;
-                while (enc < (encoderM1 + speed / 4)) { basic.pause(1); }
+                while (enc < (encoderM1 + speed / 4)) { basic.pause(5); }
             }
             else {
                 enc += encoderM1;
-                while (enc > (encoderM1 + speed / 4)) { basic.pause(1); }
+                while (enc > (encoderM1 + speed / 4)) { basic.pause(5); }
             }
             encoderOff(motor1); // если нужно непрерывно считать энкодеры, то это закомментировать
         } else if (steer < 0) {
@@ -531,14 +531,15 @@ namespace YM3_motor {
             if (speed < 0) {
                 enc *= -1;
                 enc += encoderM2;
-                while (enc < (encoderM2 + speed / 4)) { basic.pause(1); }
+                while (enc < (encoderM2 + speed / 4)) { basic.pause(5); }
             }
             else {
                 enc += encoderM2;
-                while (enc > (encoderM2 + speed / 4)) { basic.pause(1); }
+                while (enc > (encoderM2 + speed / 4)) { basic.pause(5); }
             }
             encoderOff(motor2); // если нужно непрерывно считать энкодеры, то это закомментировать
-        } else {
+        } 
+        /*else {
             initEncoder(motor1);
             initEncoder(motor2);
             MotorRun(motor1, speed);
@@ -580,6 +581,7 @@ namespace YM3_motor {
             encoderOff(motor1); // если нужно непрерывно считать энкодеры, то это закомментировать
             encoderOff(motor2);
         }
+        */
 
         if (lock == 1) MotorLock(1, 1); //1 - это М1М2
         else MotorRun(1, 0);
@@ -1496,8 +1498,6 @@ namespace YM3_I2C {
         Light_blue = 0x00FFFF,
         //% block="7-Фиолетовый"
         Purple = 0xFF00FF,
-        //% block="8-?"
-        None = 0x000001
     }
 
     function i2cWriteData(addr: number, reg: number, value: number) {
@@ -1664,7 +1664,7 @@ namespace YM3_I2C {
         else if (val_red > 122 && val_green <= 122 && val_blue > 122)
             return enGetIndex.Purple
         else
-            return enGetIndex.None
+            return enGetIndex.Black
     }
 }
 
@@ -1851,17 +1851,17 @@ namespace YM3_RGB {
 
     let strip: RGB4;
 
-    //% block="Все светодиоды %rgb"
+    //% block="Все светодиоды %rgb=pixel_colors"
     //% blockGap=8
     //% weight=95
-    export function showColor(rgb: PixelColors) {
+    export function showColor(rgb: number) {
         strip.showColor(rgb);
     }
 
-    //% block="Светодиод № %pixeloffset|%rgb"
+    //% block="Светодиод № %pixeloffset|%rgb=pixel_colors"
     //% blockGap=8
     //% weight=80
-    export function setPixelColor(pixeloffset: number, rgb: PixelColors): void {
+    export function setPixelColor(pixeloffset: number, rgb: number): void {
         strip.setPixelColor(pixeloffset, rgb);
     }
 
@@ -1893,7 +1893,7 @@ namespace YM3_RGB {
     }
 
     //% weight=2 blockGap=8
-    //% block="%color"
+    //% blockId="pixel_colors" block="%color"
     //% blockHidden=true
     export function colors(color: PixelColors): number {
         return color;
