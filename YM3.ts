@@ -2,6 +2,15 @@
 Copyright (C): 2024, YM3
 */
 
+let display = 0;
+
+function displayOff(): void {
+    if (!display) {
+        led.enable(false);
+        display = 1;
+    }
+}
+
 //% color="#cd4896" weight=40 icon="\uf085" //#9a1564
 namespace YM3_motor {
 
@@ -22,6 +31,7 @@ namespace YM3_motor {
 
     let encoderM1Time = 0
     let encoderM2Time = 0
+    let encoderM3Time = 0
 
     let initServo4 = 0
     let initServo8 = 0
@@ -38,24 +48,14 @@ namespace YM3_motor {
         S8 = 7
     }
     export enum enMotors {
-        M1 = 8,
-        M2 = 10,
-        M3 = 12
-    }
-    export enum enMotors2 {
-        M1 = 8,
-        M2 = 10
+        M1 = 5, //6
+        M2 = 2, //4
+        M3 = 0  //1
     }
     export enum enMotorsAll {
-        M1 = 8,
-        M2 = 10,
-        M3 = 12,
-        //% block="Все"
-        M1M2M3 = 1
-    }
-    export enum enMotors2All {
-        M1 = 8,
-        M2 = 10,
+        M1 = 5,
+        M2 = 2,
+        M3 = 0,
         //% block="Все"
         M1M2M3 = 1
     }
@@ -142,12 +142,13 @@ namespace YM3_motor {
         initialized = true
     }
 
-    function initEncoder(index: enMotors2All): void { //тут нужно будет заменить на enMotors
+    function initEncoder(index: enMotorsAll): void {
         if (index == 1) {
-            initEncoder(8);
-            initEncoder(10);
+            initEncoder(5);
+            initEncoder(2);
+            initEncoder(0);
         }
-        else if (index == 8) {
+        else if (index == 5) {
             if (!initEncoderM1) {
                 initEncoderM1 = true;
                 pins.onPulsed(DigitalPin.P13, PulseValue.High, function () {
@@ -162,14 +163,14 @@ namespace YM3_motor {
                 });
             }
         }
-        else if (index == 10) {
+        else if (index == 2) {
             if (!initEncoderM2) {
                 initEncoderM2 = true;
-                pins.setPull(DigitalPin.P12, PinPullMode.PullNone)
-                pins.onPulsed(DigitalPin.P8, PulseValue.High, function () { //тут будет пара 7 и 8 порта с выключением LED матрицы из-за порта 7
+                displayOff();
+                pins.onPulsed(DigitalPin.P7, PulseValue.High, function () {
                     if (control.micros() - encoderM2Time > 2500) {
                         encoderM2Time = control.micros();
-                        if (pins.digitalReadPin(DigitalPin.P12) == 1) {
+                        if (pins.digitalReadPin(DigitalPin.P8) == 1) {
                             encoderM2 += 2;
                         } else {
                             encoderM2 -= 2;
@@ -177,10 +178,26 @@ namespace YM3_motor {
                     }
                 });
             }
-        }//тут нужно будет добавить инициализацию третьего энкодера на портах 9 и 10 с выключением LED матрицы из-за порта 10
+        }
+        else {
+            if (!initEncoderM3) {
+                initEncoderM3 = true;
+                displayOff();
+                pins.onPulsed(DigitalPin.P9, PulseValue.High, function () {
+                    if (control.micros() - encoderM3Time > 2500) {
+                        encoderM3Time = control.micros();
+                        if (pins.digitalReadPin(DigitalPin.P10) == 1) {
+                            encoderM3 += 2;
+                        } else {
+                            encoderM3 -= 2;
+                        }
+                    }
+                });
+            }
+        }
     }
 
-    //% block="Сервомотор|%num|%angle\\°" blockGap=8
+    //% block="Сервомотор %num|%angle\\°" blockGap=8
     //% weight=100
     //% angle.min=0 angle.max=360
     // color=#127826
@@ -216,7 +233,7 @@ namespace YM3_motor {
         else servo8 = angle;
     }
 
-    //% block="Мотор по мощности|%index|%speed\\%" blockGap=8
+    //% block="Мотор по мощности %index|%speed\\%" blockGap=8
     //% weight=99
     //% group="Мотор"
     //% speed.min=-100 speed.max=100 speed.defl=75 speed.shadow="speedPicker"
@@ -229,27 +246,28 @@ namespace YM3_motor {
         if (speed > 100) speed = 100;
         if (speed < -100) speed = -100;
 
-        if (speed > 0) speed = Math.map(speed, 1, 100, 800, 4095); //устраняется мертвая зона мотора около 0
-        else if (speed < 0) speed = Math.map(speed, -1, -100, -800, -4095);
+        if (speed > 0) speed = Math.map(speed, 1, 100, 100, 4095); //устраняется мертвая зона мотора около 0
+        else if (speed < 0) speed = Math.map(speed, -1, -100, -100, -4095);
 
         if (speed > 4095) speed = 4095;
         if (speed < -4095) speed = -4095;
 
         if (index == 1) {
-            MotorRun(8, speed);
-            MotorRun(10, speed);
-            MotorRun(12, speed);
+            MotorRun(5, speed);
+            MotorRun(2, speed);
+            MotorRun(0, speed);
         } else {
 
-            if (index == 8)
+            if (index == 5)
                 speed *= invertM1;
-            else if (index == 10)
+            else if (index == 2)
                 speed *= invertM2;
             else
                 speed *= invertM3;
 
             let a = index
             let b = index + 1
+            if (index == 2) b++;
 
             if (a > 10) {
                 if (speed >= 0) {
@@ -272,7 +290,7 @@ namespace YM3_motor {
         }
     }
 
-    //% block="Мотор по времени|%index|%speed\\%|%time\\c|%lock" blockGap=8
+    //% block="Мотор по времени %index|%speed\\%|%time\\c|%lock" blockGap=8
     //% weight=98
     //% group="Мотор"
     //% speed.min=-100 speed.max=100 speed.defl=75 speed.shadow="speedPicker"
@@ -288,13 +306,13 @@ namespace YM3_motor {
         else MotorRun(index, 0);
     }
 
-    //% block="Мотор по энкодеру|%index|%speed\\%|%rotations\\↻|%degrees\\°|%mode|%lock" blockGap=8
+    //% block="Мотор по энкодеру %index|%speed\\%|%rotations\\↻|%degrees\\°|%mode|%lock" blockGap=8
     //% weight=97
     //% group="Мотор"
     //% speed.min=-100 speed.max=100 speed.defl=75 speed.shadow="speedPicker"
     //% rotations.defl=1 degrees.defl=360
     //% inlineInputMode=inline
-    export function MotorRunRD(index: enMotors2, speed: number, rotations: number, degrees: number, mode: enMode, lock: enLock): void {
+    export function MotorRunRD(index: enMotors, speed: number, rotations: number, degrees: number, mode: enMode, lock: enLock): void {
         if (speed > 100) speed = 100;
         if (speed < -100) speed = -100;
 
@@ -302,10 +320,12 @@ namespace YM3_motor {
 
         encoderM1 = 0; // если нужно непрерывно считать энкодеры, то это закомментировать
         encoderM2 = 0;
+        encoderM3 = 0;
 
         let motor;
-        if (index == 8) motor = 8;
-        else if (index == 10) motor = 10;
+        if (index == 5) motor = 5;
+        else if (index == 2) motor = 2;
+        else motor = 0;
 
         if (mode == 1) {
             enc += Math.abs(rotations) * 360;
@@ -321,26 +341,37 @@ namespace YM3_motor {
 
         MotorRun(motor, speed);
 
-        if (index == 8) {
+        if (index == 5) {
             if (speed < 0) {
                 enc *= -1;
                 enc += encoderM1;
-                while (enc < (encoderM1 + speed / 4)) { basic.pause(1); }
+                while (enc < (encoderM1 + speed / 4)) { basic.pause(5); }
             }
             else {
                 enc += encoderM1;
-                while (enc > (encoderM1 + speed / 4)) { basic.pause(1); }
+                while (enc > (encoderM1 + speed / 4)) { basic.pause(5); }
             }
         }
-        else if (index == 10) {
+        else if (index == 2) {
             if (speed < 0) {
                 enc *= -1;
                 enc += encoderM2;
-                while (enc < (encoderM2 + speed / 4)) { basic.pause(1); }
+                while (enc < (encoderM2 + speed / 4)) { basic.pause(5); }
             }
             else {
                 enc += encoderM2;
-                while (enc > (encoderM2 + speed / 4)) { basic.pause(1); }
+                while (enc > (encoderM2 + speed / 4)) { basic.pause(5); }
+            }
+        }
+        else {
+            if (speed < 0) {
+                enc *= -1;
+                enc += encoderM3;
+                while (enc < (encoderM3 + speed / 4)) { basic.pause(5); }
+            }
+            else {
+                enc += encoderM3;
+                while (enc > (encoderM3 + speed / 4)) { basic.pause(5); }
             }
         }
 
@@ -350,7 +381,7 @@ namespace YM3_motor {
         else MotorRun(motor, 0);
     }
 
-    //% block="Инвертирование мотора|%index" blockGap=8
+    //% block="Инвертирование мотора %index" blockGap=8
     //% weight=96
     //% group="Мотор"
     export function MotorInvert(index: enMotorsAll): void {
@@ -359,15 +390,15 @@ namespace YM3_motor {
             invertM2 *= -1;
             invertM3 *= -1;
         }
-        else if (index == 8)
+        else if (index == 5)
             invertM1 *= -1;
-        else if (index == 10)
+        else if (index == 2)
             invertM2 *= -1;
         else
             invertM3 *= -1;
     }
 
-    //% block="Рулевое управление по мощности|%motor|%steer\\↑|%speed\\%" blockGap=8
+    //% block="Рулевое управление по мощности %motor|%steer\\↑|%speed\\%" blockGap=8
     //% weight=92
     //% steer.shadow=speedPicker steer.min=-100 steer.max=100 steer.defl=0
     //% speed.shadow=speedPicker speed.min=-100 speed.max=100 speed.defl=75
@@ -384,14 +415,14 @@ namespace YM3_motor {
         let motor2;
 
         if (motor == 1) {
-            motor1 = 8;
-            motor2 = 10;
+            motor1 = 5;
+            motor2 = 2;
         } else if (motor == 2) {
-            motor1 = 8;
-            motor2 = 12;
+            motor1 = 5;
+            motor2 = 0;
         } else {
-            motor1 = 10;
-            motor2 = 12;
+            motor1 = 2;
+            motor2 = 0;
         }
         if (steer >= 0) {
             MotorRun(motor1, speed);
@@ -408,7 +439,7 @@ namespace YM3_motor {
         }
     }
 
-    //% block="Рулевое управление по времени|%motor|%steer\\↑|%speed\\%|%time\\c|%lock" blockGap=8
+    //% block="Рулевое управление по времени %motor|%steer\\↑|%speed\\%|%time\\c|%lock" blockGap=8
     //% weight=91
     //% steer.shadow=speedPicker steer.min=-100 steer.max=100 steer.defl=0
     //% speed.shadow=speedPicker speed.min=-100 speed.max=100 speed.defl=75
@@ -426,14 +457,14 @@ namespace YM3_motor {
         let motor2;
 
         if (motor == 1) {
-            motor1 = 8;
-            motor2 = 10;
+            motor1 = 5;
+            motor2 = 2;
         } else if (motor == 2) {
-            motor1 = 8;
-            motor2 = 12;
+            motor1 = 5;
+            motor2 = 0;
         } else {
-            motor1 = 10;
-            motor2 = 12;
+            motor1 = 2;
+            motor2 = 0;
         }
         if (steer >= 0) {
             MotorRun(motor1, speed);
@@ -455,22 +486,33 @@ namespace YM3_motor {
         else MotorLockDual(motor, 0);
     }
 
-    //% block="Рулевое управление по энкодеру М1М2|%steer\\↑|%speed\\%|%rotations\\↻|%degrees\\°|%mode|%lock" blockGap=8
+    //% block="Рулевое управление по энкодеру %motor|%steer\\↑|%speed\\%|%rotations\\↻|%degrees\\°|%mode|%lock" blockGap=8
     //% weight=90
     //% steer.shadow=speedPicker steer.min=-100 steer.max=100 steer.defl=0
     //% speed.shadow=speedPicker speed.min=-100 speed.max=100 speed.defl=75
     //% rotations.defl=1 degrees.defl=360
     //% inlineInputMode=inline
     //% group="Рулевое управление моторами"
-    export function MotorRunSteerRD(steer: number, speed: number, rotations: number, degrees: number, mode: enMode, lock: enLock): void {
+    export function MotorRunSteerRD(motor: enMotorsDual, steer: number, speed: number, rotations: number, degrees: number, mode: enMode, lock: enLock): void {
         if (speed > 100) speed = 100;
         if (speed < -100) speed = -100;
 
         if (steer > 100) steer = 100;
         if (steer < -100) steer = -100;
 
-        let motor1 = 8;
-        let motor2 = 10;
+        let motor1
+        let motor2
+
+        if (motor == 1) {
+            motor1 = 5;
+            motor2 = 2;
+        } else if (motor == 2) {
+            motor1 = 5;
+            motor2 = 0;
+        } else {
+            motor1 = 2;
+            motor2 = 0;
+        }
 
         let enc = 0;
 
@@ -478,19 +520,7 @@ namespace YM3_motor {
 
         encoderM1 = 0; // если нужно непрерывно считать энкодеры, то это закомментировать
         encoderM2 = 0;
-
-        /* до появления энкодеров у третьего мотора неактуально
-        if (motor == 1) {
-            motor1 = 8;
-            motor2 = 10;
-        } else if (motor == 2) {
-            motor1 = 8;
-            motor2 = 12;
-        } else {
-            motor1 = 10;
-            motor2 = 12;
-        }
-        */
+        encoderM3 = 0;
 
         if (mode == 1) {
             enc += Math.abs(rotations) * 360;
@@ -509,15 +539,26 @@ namespace YM3_motor {
                 MotorRun(motor2, speed - steer * 2);
             else
                 MotorRun(motor2, speed + steer * 2);
-
-            if (speed < 0) {
-                enc *= -1;
-                enc += encoderM1;
-                while (enc < (encoderM1 + speed / 4)) { basic.pause(5); }
-            }
-            else {
-                enc += encoderM1;
-                while (enc > (encoderM1 + speed / 4)) { basic.pause(5); }
+            if (motor1 == 5) {
+                if (speed < 0) {
+                    enc *= -1;
+                    enc += encoderM1;
+                    while (enc < (encoderM1 + speed / 4)) { basic.pause(5); }
+                }
+                else {
+                    enc += encoderM1;
+                    while (enc > (encoderM1 + speed / 4)) { basic.pause(5); }
+                }
+            } else if (motor1 == 2) {
+                if (speed < 0) {
+                    enc *= -1;
+                    enc += encoderM2;
+                    while (enc < (encoderM2 + speed / 4)) { basic.pause(5); }
+                }
+                else {
+                    enc += encoderM2;
+                    while (enc > (encoderM2 + speed / 4)) { basic.pause(5); }
+                }
             }
             encoderOff(motor1); // если нужно непрерывно считать энкодеры, то это закомментировать
         } else if (steer < 0) {
@@ -527,15 +568,26 @@ namespace YM3_motor {
                 MotorRun(motor1, speed + steer * 2);
             else
                 MotorRun(motor1, speed - steer * 2);
-
-            if (speed < 0) {
-                enc *= -1;
-                enc += encoderM2;
-                while (enc < (encoderM2 + speed / 4)) { basic.pause(5); }
-            }
-            else {
-                enc += encoderM2;
-                while (enc > (encoderM2 + speed / 4)) { basic.pause(5); }
+            if (motor2 == 2) {
+                if (speed < 0) {
+                    enc *= -1;
+                    enc += encoderM2;
+                    while (enc < (encoderM2 + speed / 4)) { basic.pause(5); }
+                }
+                else {
+                    enc += encoderM2;
+                    while (enc > (encoderM2 + speed / 4)) { basic.pause(5); }
+                }
+            } else if (motor2 == 0) {
+                if (speed < 0) {
+                    enc *= -1;
+                    enc += encoderM3;
+                    while (enc < (encoderM3 + speed / 4)) { basic.pause(5); }
+                }
+                else {
+                    enc += encoderM3;
+                    while (enc > (encoderM3 + speed / 4)) { basic.pause(5); }
+                }
             }
             encoderOff(motor2); // если нужно непрерывно считать энкодеры, то это закомментировать
         } 
@@ -583,11 +635,11 @@ namespace YM3_motor {
         }
         */
 
-        if (lock == 1) MotorLock(1, 1); //1 - это М1М2
-        else MotorRun(1, 0);
+        if (lock == 1) MotorLockDual(motor, 1);
+        else MotorLockDual(motor, 0);
     }
 
-    //% block="Танковое управление по мощности|%motor|%speed1\\%|%speed2\\%" blockGap=8
+    //% block="Танковое управление по мощности %motor|%speed1\\%|%speed2\\%" blockGap=8
     //% weight=89
     //% speed1.shadow=speedPicker speed1.min=-100 speed1.max=100 speed1.defl=75
     //% speed2.shadow=speedPicker speed2.min=-100 speed2.max=100 speed2.defl=75
@@ -604,21 +656,21 @@ namespace YM3_motor {
         let motor2;
 
         if (motor == 1) {
-            motor1 = 8;
-            motor2 = 10;
+            motor1 = 5;
+            motor2 = 2;
         } else if (motor == 2) {
-            motor1 = 8;
-            motor2 = 12;
+            motor1 = 5;
+            motor2 = 0;
         } else {
-            motor1 = 10;
-            motor2 = 12;
+            motor1 = 2;
+            motor2 = 0;
         }
 
         MotorRun(motor1, speed1);
         MotorRun(motor2, speed2);
     }
 
-    //% block="Танковое управление по времени|%motor|%speed1\\%|%speed2\\%|%time\\c|%lock" blockGap=8
+    //% block="Танковое управление по времени %motor|%speed1\\%|%speed2\\%|%time\\c|%lock" blockGap=8
     //% weight=88
     //% speed1.shadow=speedPicker speed1.min=-100 speed1.max=100 speed1.defl=75
     //% speed2.shadow=speedPicker speed2.min=-100 speed2.max=100 speed2.defl=75
@@ -636,14 +688,14 @@ namespace YM3_motor {
         let motor2;
 
         if (motor == 1) {
-            motor1 = 8;
-            motor2 = 10;
+            motor1 = 5;
+            motor2 = 2;
         } else if (motor == 2) {
-            motor1 = 8;
-            motor2 = 12;
+            motor1 = 5;
+            motor2 = 0;
         } else {
-            motor1 = 10;
-            motor2 = 12;
+            motor1 = 2;
+            motor2 = 0;
         }
 
         MotorRun(motor1, speed1);
@@ -655,40 +707,39 @@ namespace YM3_motor {
         else MotorLockDual(motor, 0);
     }
 
-    //% block="Танковое управление по энкодеру М1М2|%speed1\\%|%speed2\\%|%rotations\\↻|%degrees\\°|%mode|%lock" blockGap=8
+    //% block="Танковое управление по энкодеру %motor|%speed1\\%|%speed2\\%|%rotations\\↻|%degrees\\°|%mode|%lock" blockGap=8
     //% weight=87
     //% speed1.shadow=speedPicker speed1.min=-100 speed1.max=100 speed1.defl=75
     //% speed2.shadow=speedPicker speed2.min=-100 speed2.max=100 speed2.defl=75
     //% rotations.defl=1 degrees.defl=360
     //% inlineInputMode=inline
     //% group="Танковое управление моторами"
-    export function MotorRunTankRD(speed1: number, speed2: number, rotations: number, degrees: number, mode: enMode, lock: enLock): void {
+    export function MotorRunTankRD(motor: enMotorsDual, speed1: number, speed2: number, rotations: number, degrees: number, mode: enMode, lock: enLock): void {
         if (speed1 > 100) speed1 = 100;
         if (speed1 < -100) speed1 = -100;
 
         if (speed2 > 100) speed2 = 100;
         if (speed2 < -100) speed2 = -100;
 
-        let motor1 = 8;
-        let motor2 = 10;
+        let motor1;
+        let motor2;
+
+        if (motor == 1) {
+            motor1 = 5;
+            motor2 = 2;
+        } else if (motor == 2) {
+            motor1 = 5;
+            motor2 = 0;
+        } else {
+            motor1 = 2;
+            motor2 = 0;
+        }
 
         let enc = 0;
 
         encoderM1 = 0; // если нужно непрерывно считать энкодеры, то это закомментировать
         encoderM2 = 0;
-
-        /* до появления энкодеров у третьего мотора неактуально
-        if (motor == 1) {
-            motor1 = 8;
-            motor2 = 10;
-        } else if (motor == 2) {
-            motor1 = 8;
-            motor2 = 12;
-        } else {
-            motor1 = 10;
-            motor2 = 12;
-        }
-        */
+        encoderM3 = 0;
 
         if (mode == 1) {
             enc += Math.abs(rotations) * 360;
@@ -705,14 +756,26 @@ namespace YM3_motor {
             MotorRun(motor1, speed1);
             MotorRun(motor2, speed2);
 
-            if (speed1 < 0) {
-                enc *= -1;
-                enc += encoderM1;
-                while (enc < (encoderM1 + speed1 / 4)) { basic.pause(1); }
-            }
-            else {
-                enc += encoderM1;
-                while (enc > (encoderM1 + speed1 / 4)) { basic.pause(1); }
+            if (motor1 == 5) {
+                if (speed1 < 0) {
+                    enc *= -1;
+                    enc += encoderM1;
+                    while (enc < (encoderM1 + speed1 / 4)) { basic.pause(5); }
+                }
+                else {
+                    enc += encoderM1;
+                    while (enc > (encoderM1 + speed1 / 4)) { basic.pause(5); }
+                }
+            } else if (motor1 == 2) {
+                if (speed1 < 0) {
+                    enc *= -1;
+                    enc += encoderM2;
+                    while (enc < (encoderM2 + speed1 / 4)) { basic.pause(5); }
+                }
+                else {
+                    enc += encoderM2;
+                    while (enc > (encoderM2 + speed1 / 4)) { basic.pause(5); }
+                }
             }
             encoderOff(motor1); // если нужно непрерывно считать энкодеры, то это закомментировать
         } else {
@@ -720,23 +783,35 @@ namespace YM3_motor {
             MotorRun(motor1, speed1);
             MotorRun(motor2, speed2);
 
-            if (speed2 < 0) {
-                enc *= -1;
-                enc += encoderM2;
-                while (enc < (encoderM2 + speed2 / 4)) { basic.pause(1); }
-            }
-            else {
-                enc += encoderM2;
-                while (enc > (encoderM2 + speed2 / 4)) { basic.pause(1); }
+            if (motor2 == 2) {
+                if (speed2 < 0) {
+                    enc *= -1;
+                    enc += encoderM2;
+                    while (enc < (encoderM2 + speed2 / 4)) { basic.pause(5); }
+                }
+                else {
+                    enc += encoderM2;
+                    while (enc > (encoderM2 + speed2 / 4)) { basic.pause(5); }
+                }
+            } else if (motor2 == 0) {
+                if (speed2 < 0) {
+                    enc *= -1;
+                    enc += encoderM3;
+                    while (enc < (encoderM3 + speed2 / 4)) { basic.pause(5); }
+                }
+                else {
+                    enc += encoderM3;
+                    while (enc > (encoderM3 + speed2 / 4)) { basic.pause(5); }
+                }
             }
             encoderOff(motor2); // если нужно непрерывно считать энкодеры, то это закомментировать
         }
 
-        if (lock == 1) MotorLock(1, 1); //1 - это М1М2
-        else MotorRun(1, 0);
+        if (lock == 1) MotorLockDual(motor, 1);
+        else MotorLockDual(motor, 0);
     }
 
-    //% block="Остановка мотора|%index|%lock" blockGap=8
+    //% block="Остановка мотора %index|%lock" blockGap=8
     //% weight=85
     //% group="Остановка моторов"
     export function MotorLock(index: enMotorsAll, l: enLock): void {
@@ -745,16 +820,18 @@ namespace YM3_motor {
         }
         if (l == 1) {
             if (index != 1) {
-                setPwm(index, 0, 4095)
-                setPwm(index + 1, 0, 4095)
-
+                let a = index;
+                let b = index + 1;
+                if (index == 2) b++;
+                setPwm(a, 0, 4095)
+                setPwm(b, 0, 4095)
             } else {
-                setPwm(8, 0, 4095)
-                setPwm(8 + 1, 0, 4095)
-                setPwm(10, 0, 4095)
-                setPwm(10 + 1, 0, 4095)
-                setPwm(12, 0, 4095)
-                setPwm(12 + 1, 0, 4095)
+                setPwm(5, 0, 4095)
+                setPwm(6, 0, 4095)
+                setPwm(2, 0, 4095)
+                setPwm(4, 0, 4095)
+                setPwm(0, 0, 4095)
+                setPwm(1, 0, 4095)
             }
             basic.pause(200)
         }
@@ -762,13 +839,13 @@ namespace YM3_motor {
         if (index != 1) {
             MotorRun(index, 0);
         } else {
-            MotorRun(8, 0);
-            MotorRun(10, 0);
-            MotorRun(12, 0);
+            MotorRun(5, 0);
+            MotorRun(2, 0);
+            MotorRun(0, 0);
         }
     }
 
-    //% block="Остановка двух моторов|%motor|%lock" blockGap=8
+    //% block="Остановка двух моторов %motor|%lock" blockGap=8
     //% weight=84
     //% group="Остановка моторов"
     //% inlineInputMode=inline
@@ -776,83 +853,92 @@ namespace YM3_motor {
         if (!initialized) {
             initPCA9685()
         }
-        let motor1;
-        let motor2;
+        let motor1_a, motor1_b;
+        let motor2_a, motor2_b;
         if (motor == 1) {
-            motor1 = 8;
-            motor2 = 10;
+            motor1_a = 5; motor1_b = 6;
+            motor2_a = 2; motor2_b = 4;
         } else if (motor == 2) {
-            motor1 = 8;
-            motor2 = 12;
+            motor1_a = 5; motor1_b = 6;
+            motor2_a = 0; motor2_b = 1;
         } else {
-            motor1 = 10;
-            motor2 = 12;
+            motor1_a = 2; motor1_b = 4;
+            motor2_a = 0; motor2_b = 1;
         }
         if (l == 1) {
-            setPwm(motor1, 0, 4095)
-            setPwm(motor1 + 1, 0, 4095)
-            setPwm(motor2, 0, 4095)
-            setPwm(motor2 + 1, 0, 4095)
+            setPwm(motor1_a, 0, 4095)
+            setPwm(motor1_b, 0, 4095)
+            setPwm(motor2_a, 0, 4095)
+            setPwm(motor2_b, 0, 4095)
             basic.pause(200)
         }
 
-        MotorRun(motor1, 0);
-        MotorRun(motor2, 0);
+        MotorRun(motor1_a, 0);
+        MotorRun(motor2_a, 0);
     }
 
-    //% block="Включение/обнуление энкодера|%index" blockGap=8
+    //% block="Включение/обнуление энкодера %index" blockGap=8
     //% weight=80
     //% group="Энкодеры"
     // color=#e3b838
-    export function zeroEncoder(index: enMotors2All): void {
+    export function zeroEncoder(index: enMotorsAll): void {
         if (index != 1) {
             initEncoder(index);
-            if (index == 8) encoderM1 = 0;
-            else if (index == 10) encoderM2 = 0;
+            if (index == 5) encoderM1 = 0;
+            else if (index == 2) encoderM2 = 0;
+            else encoderM3 = 0;
         } else {
-            initEncoder(8);
-            initEncoder(10);
+            initEncoder(5);
+            initEncoder(2);
+            initEncoder(0);
             encoderM1 = 0;
             encoderM2 = 0;
+            encoderM3 = 0;
         }
     }
 
-    //% block="Выключение энкодера|%index" blockGap=8
+    //% block="Выключение энкодера %index" blockGap=8
     //% weight=78
     //% group="Энкодеры"
     // color=#e3b838
-    export function encoderOff(index: enMotors2All): void {
+    export function encoderOff(index: enMotorsAll): void {
         if (index == 1) {
-            encoderOff(8);
-            encoderOff(10);
+            encoderOff(5);
+            encoderOff(2);
+            encoderOff(0);
         }
-        else if (index == 8) {
+        else if (index == 5) {
             initEncoderM1 = false;
             pins.digitalWritePin(DigitalPin.P13, 1) //отключает подписку на onPulsed
             //control.onEvent(DigitalPin.P13, PulseValue.High, function () { }, 32768) //32768 - это флаг удаления сообщений
 
         }
-        else if (index == 10) {
+        else if (index == 2) {
             initEncoderM2 = false;
-            pins.digitalWritePin(DigitalPin.P8, 1) //отключает подписку на onPulsed
+            pins.digitalWritePin(DigitalPin.P7, 1) //отключает подписку на onPulsed
+        }
+        else {
+            initEncoderM3 = false;
+            pins.digitalWritePin(DigitalPin.P9, 1) //отключает подписку на onPulsed
         }
     }
 
-    //% block="Значение энкодера|%index|%mode" blockGap=8
+    //% block="Значение энкодера %index|%mode" blockGap=8
     //% weight=77
     //% group="Энкодеры"
     // color=#e3b838
-    export function valueEncoder(index: enMotors2, mode: enMode2): number {
-        if (index == 8) {
+    export function valueEncoder(index: enMotors, mode: enMode2): number {
+        if (index == 5) {
             if (mode == 1) return encoderM1 / 360;
             else return encoderM1;
         }
-        else if (index == 10) {
+        else if (index == 2) {
             if (mode == 1) return encoderM2 / 360;
             else return encoderM2;
         }
         else {
-            return 0;
+            if (mode == 1) return encoderM3 / 360;
+            else return encoderM3;
         }
     }
 }
@@ -894,15 +980,6 @@ namespace YM3_module {
         DU = 2
     }
 
-    let display = 0;
-
-    function displayOff(): void {
-        if (!display) {
-            led.enable(false);
-            display = 1;
-        }
-    }
-
     //% block="Ультразвуковой модуль|%index"
     //% weight=90
     export function Ultrasonic(index: enPorts4): number {
@@ -938,7 +1015,7 @@ namespace YM3_module {
         let value;
         if (index == 1) {
             displayOff();
-            value = pins.analogReadPin(AnalogPin.P3);
+            value = pins.analogReadPin(AnalogPin.P0);
         } else {
             value = pins.analogReadPin(AnalogPin.P2);
         }
