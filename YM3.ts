@@ -947,18 +947,18 @@ namespace YM3_motor {
 namespace YM3_module {
 
     export enum enPorts4 {
-        P0P3 = 1,
+        P3P0 = 1,
         P1P2 = 2,
         P5P11 = 3,
         P4P6 = 4
     }
     export enum enPorts3 {
-        P0P3 = 1,
+        P3P0 = 1,
         P1P2 = 2,
         P4P6 = 3
     }
     export enum enPorts2 {
-        P0P3 = 1,
+        P3P0 = 1,
         P1P2 = 2
     }
     export enum enRocker {
@@ -980,14 +980,14 @@ namespace YM3_module {
         DU = 2
     }
 
-    //% block="Ультразвуковой модуль|%index"
+    //% block="Ультразвуковой модуль %index"
     //% weight=90
     export function Ultrasonic(index: enPorts4): number {
         //send pulse
         let Trig, Echo;
         if (index == 1) {
             displayOff();
-            Trig = DigitalPin.P0; Echo = DigitalPin.P3;
+            Trig = DigitalPin.P3; Echo = DigitalPin.P0;
         }
         else if (index == 2) { Trig = DigitalPin.P1; Echo = DigitalPin.P2; }
         else if (index == 3) { Trig = DigitalPin.P5; Echo = DigitalPin.P11; }
@@ -1009,12 +1009,11 @@ namespace YM3_module {
         return Math.idiv(d, 58);
     }
 
-    //% block="Аналоговый ИК модуль|%index"
+    //% block="Аналоговый ИК модуль %index"
     //% weight=89
     export function IR_ac(index: enPorts2): number {
         let value;
         if (index == 1) {
-            displayOff();
             value = pins.analogReadPin(AnalogPin.P0);
         } else {
             value = pins.analogReadPin(AnalogPin.P2);
@@ -1024,32 +1023,12 @@ namespace YM3_module {
         return Math.round((1023 - value) / 1024 * 100);
     }
 
-    //% block="Разница ИК"
-    //% weight=88
-    export function IR_acDif(): number {
-        let value;
-        let value1;
-        let value2;
-
-        displayOff();
-
-        value1 = Math.map(pins.analogReadPin(AnalogPin.P3), 600, 1023, 0, 1023);
-        if (value1 < 0) value1 = 0;
-        if (value1 > 1023) value1 = 1023;
-
-        value2 = pins.analogReadPin(AnalogPin.P2);
-
-        value = value1 - value2;
-
-        return Math.round((1023 - value) / 1024 * 100) - 70;
-    }
-
-    //% block="Цифровой ИК модуль|%index"
+    //% block="Цифровой ИК модуль %index"
     //% weight=87
     export function IR_dc(index: enPorts4): boolean {
         let pin;
         let x;
-        if (index == 1) { pin = DigitalPin.P0; }
+        if (index == 1) { displayOff(); pin = DigitalPin.P3; }
         else if (index == 2) { pin = DigitalPin.P1; }
         else if (index == 3) { pin = DigitalPin.P5; }
         else if (index == 4) { displayOff(); pin = DigitalPin.P4; }
@@ -1059,7 +1038,7 @@ namespace YM3_module {
         else { return false; }
     }
 
-    //% block="Аналоговый джойстик|%value"
+    //% block="Аналоговый джойстик %value"
     //% weight=80
     export function Rocker_ac(value: enRocker2): number {
 
@@ -1070,7 +1049,7 @@ namespace YM3_module {
         else { return y; }
     }
 
-    //% block="Цифровой джойстик|%value"
+    //% block="Цифровой джойстик %value"
     //% weight=79
     export function Rocker(value: enRocker): boolean {
 
@@ -1088,11 +1067,11 @@ namespace YM3_module {
         return now_state == value;
     }
 
-    //% block="Потенциометр|%index"
+    //% block="Потенциометр %index"
     //% weight=78
     export function Potentiometer(index: enPorts3): number {
         let pin;
-        if (index == 1) { pin = AnalogPin.P0; }
+        if (index == 1) { displayOff(); pin = AnalogPin.P3; }
         else if (index == 2) { pin = AnalogPin.P1; }
         else if (index == 3) { displayOff(); pin = AnalogPin.P4; }
 
@@ -1242,7 +1221,7 @@ namespace YM3_I2C {
         }
     }
 
-    //% block="Прокрутка %str | пауза (мс) %del"
+    //% block="Прокрутка %str |пауза (мс) %del"
     //% weight=90 blockGap=8
     //% group="Индикатор"
     export function showRuning(str: string, del: number) {
@@ -1772,15 +1751,6 @@ namespace YM3_RGB {
         Black = 0x000000
     }
 
-    export enum PixelMode {
-        //% block="GRB"
-        RGB = 0,
-        //% block="RGB+W"
-        RGBW = 1,
-        //% block="RGB"
-        RGB_RGB = 2
-    }
-
     //% shim=sendBufferAsm
     function sendBuffer(buf: Buffer, pin: DigitalPin) {
     }
@@ -1792,7 +1762,7 @@ namespace YM3_RGB {
         brightness: number;
         start: number; // start offset in LED strip
         _length: number; // number of LEDs
-        _mode: PixelMode;
+        _mode: number;
         _matrixWidth: number; // number of leds in a matrix - if any
         _matrixChain: number; // the connection type of matrix chain
         _matrixRotation: number; // the rotation type of matrix
@@ -1834,13 +1804,8 @@ namespace YM3_RGB {
         }
 
         private setBufferRGB(offset: number, red: number, green: number, blue: number): void {
-            if (this._mode === PixelMode.RGB_RGB) {
-                this.buf[offset + 0] = red;
-                this.buf[offset + 1] = green;
-            } else {
-                this.buf[offset + 0] = green;
-                this.buf[offset + 1] = red;
-            }
+            this.buf[offset + 0] = red;
+            this.buf[offset + 1] = green;
             this.buf[offset + 2] = blue;
         }
 
@@ -1858,21 +1823,6 @@ namespace YM3_RGB {
             const end = this.start + this._length;
             for (let i = this.start; i < end; ++i) {
                 this.setBufferRGB(i * 3, red, green, blue)
-            }
-        }
-        private setAllW(white: number) {
-            if (this._mode !== PixelMode.RGBW)
-                return;
-
-            let br = this.brightness;
-            if (br < 255) {
-                white = (white * br) >> 8;
-            }
-            let buf = this.buf;
-            let end = this.start + this._length;
-            for (let i = this.start; i < end; ++i) {
-                let ledoffset = i * 4;
-                buf[ledoffset + 3] = white;
             }
         }
         private setPixelRGB(pixeloffset: number, rgb: number): void {
@@ -1894,23 +1844,6 @@ namespace YM3_RGB {
             }
             this.setBufferRGB(pixeloffset, red, green, blue)
         }
-        private setPixelW(pixeloffset: number, white: number): void {
-            if (this._mode !== PixelMode.RGBW)
-                return;
-
-            if (pixeloffset < 0
-                || pixeloffset >= this._length)
-                return;
-
-            pixeloffset = (pixeloffset + this.start) * 4;
-
-            let br = this.brightness;
-            if (br < 255) {
-                white = (white * br) >> 8;
-            }
-            let buf = this.buf;
-            buf[pixeloffset + 3] = white;
-        }
     }
 
     //% block="Инициализация светодиодов"
@@ -1920,7 +1853,7 @@ namespace YM3_RGB {
         strip.buf = pins.createBuffer(12);
         strip.start = 0;
         strip._length = 4;
-        strip._mode = PixelMode.RGB;
+        strip._mode = 2;
         strip._matrixWidth = 0;
         strip.setBrightness(255);
         strip.setPin(DigitalPin.P12);
