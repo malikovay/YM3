@@ -1804,8 +1804,8 @@ namespace YM3_RGB {
         }
 
         private setBufferRGB(offset: number, red: number, green: number, blue: number): void {
-            this.buf[offset + 0] = red;
-            this.buf[offset + 1] = green;
+            this.buf[offset + 1] = red;
+            this.buf[offset + 0] = green;
             this.buf[offset + 2] = blue;
         }
 
