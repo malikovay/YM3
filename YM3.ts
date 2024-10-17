@@ -290,42 +290,48 @@ namespace YM3_motor {
         if (index == 5) {
             speed *= invertM1;
             initM1 = true;
-            encoderM1step = speed * 9;  // за 1 секунду вал мотора делает поворот на 9 градусов при мощности 1%
+            encoderM1step = speed * 1.8;  // за 1 секунду вал мотора делает поворот на 9 градусов при мощности 1%
+            encoderM1target = encoderM1
         } else if (index == 2) {
             speed *= invertM2;
             initM2 = true;
-            encoderM2step = speed * 9;
+            encoderM2step = speed * 1.8;
+            encoderM2target = encoderM2
         } else {
             speed *= invertM3;
             initM3 = true;
-            encoderM3step = speed * 9;
+            encoderM3step = speed * 1.8;
+            encoderM3target = encoderM3
         }
 
         if (!initM) {
             initM = true;
-            loops.everyInterval(1000, function () {
+            loops.everyInterval(200, function () {
                 if (initM1) {
-                    encoderM1target = encoderM1 + encoderM1step;
+                    encoderM1target += encoderM1step;
                 }
                 if (initM2) {
-                    encoderM2target = encoderM2 + encoderM2step;
+                    encoderM2target += encoderM2step;
                 } 
                 if (initM3) {
-                    encoderM3target = encoderM3 + encoderM3step;
+                    encoderM3target += encoderM3step;
                 }
             })
             basic.forever(function () {
                 if (initM1) {
-                    let p = encoderM1target - encoderM1;
-                    if (p > 0) {
-                        setPwm(5, 0, 4095)
-                        setPwm(6, 0, 0)
-                    } else if (p < 0) {
+                    let p = (encoderM1target - encoderM1) * 3.44;
+                    if (p > 3095) p = 3095
+                    if (p < -3095) p = -3095
+
+                    if (p > 10) {
+                        setPwm(6, 0, p + 1000)
                         setPwm(5, 0, 0)
-                        setPwm(6, 0, 4095)
+                    } else if (p < -10) {
+                        setPwm(6, 0, 0)
+                        setPwm(5, 0, -p + 1000)
                     } else {
-                        setPwm(5, 0, 4095)
-                        setPwm(6, 0, 4095)
+                        setPwm(6, 0, 0)
+                        setPwm(5, 0, 0)
                     }
                 }
                 basic.pause(2);
