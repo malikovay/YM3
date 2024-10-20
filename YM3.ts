@@ -369,37 +369,43 @@ namespace YM3_motor {
 
         MotorRun(motor, speed);
 
+        let k = 1;
+        if (Math.abs(speed) >= 20 && Math.abs(speed) <= 42)
+            k = 2;
+        else if (Math.abs(speed) <= 19)
+            k = 4;
+
         if (index == 5) {
             if (speed < 0) {
                 enc *= -1;
                 enc += encoderM1;
-                while (enc < (encoderM1 + speed / 4)) { basic.pause(5); }
+                while (enc < (encoderM1 + speed / k)) { basic.pause(5); }
             }
             else {
                 enc += encoderM1;
-                while (enc > (encoderM1 + speed / 4)) { basic.pause(5); }
+                while (enc > (encoderM1 + speed / k)) { basic.pause(5); }
             }
         }
         else if (index == 2) {
             if (speed < 0) {
                 enc *= -1;
                 enc += encoderM2;
-                while (enc < (encoderM2 + speed / 4)) { basic.pause(5); }
+                while (enc < (encoderM2 + speed / k)) { basic.pause(5); }
             }
             else {
                 enc += encoderM2;
-                while (enc > (encoderM2 + speed / 4)) { basic.pause(5); }
+                while (enc > (encoderM2 + speed / k)) { basic.pause(5); }
             }
         }
         else {
             if (speed < 0) {
                 enc *= -1;
                 enc += encoderM3;
-                while (enc < (encoderM3 + speed / 4)) { basic.pause(5); }
+                while (enc < (encoderM3 + speed / k)) { basic.pause(5); }
             }
             else {
                 enc += encoderM3;
-                while (enc > (encoderM3 + speed / 4)) { basic.pause(5); }
+                while (enc > (encoderM3 + speed / k)) { basic.pause(5); }
             }
         }
 
@@ -560,6 +566,12 @@ namespace YM3_motor {
             enc += Math.abs(rotations) * 360 + Math.abs(degrees);
         }
 
+        let k = 1;
+        if (Math.abs(speed) >= 20 && Math.abs(speed) <= 42)
+            k = 2;
+        else if (Math.abs(speed) <= 19)
+            k = 4;
+
         if (steer >= 0) {
             initEncoder(motor1);
             MotorRun(motor1, speed);
@@ -571,21 +583,21 @@ namespace YM3_motor {
                 if (speed < 0) {
                     enc *= -1;
                     enc += encoderM1;
-                    while (enc < (encoderM1 + speed / 4)) { basic.pause(5); }
+                    while (enc < (encoderM1 + speed / k)) { basic.pause(5); }
                 }
                 else {
                     enc += encoderM1;
-                    while (enc > (encoderM1 + speed / 4)) { basic.pause(5); }
+                    while (enc > (encoderM1 + speed / k)) { basic.pause(5); }
                 }
             } else if (motor1 == 2) {
                 if (speed < 0) {
                     enc *= -1;
                     enc += encoderM2;
-                    while (enc < (encoderM2 + speed / 4)) { basic.pause(5); }
+                    while (enc < (encoderM2 + speed / k)) { basic.pause(5); }
                 }
                 else {
                     enc += encoderM2;
-                    while (enc > (encoderM2 + speed / 4)) { basic.pause(5); }
+                    while (enc > (encoderM2 + speed / k)) { basic.pause(5); }
                 }
             }
             encoderOff(motor1); // если нужно непрерывно считать энкодеры, то это закомментировать
@@ -600,21 +612,21 @@ namespace YM3_motor {
                 if (speed < 0) {
                     enc *= -1;
                     enc += encoderM2;
-                    while (enc < (encoderM2 + speed / 4)) { basic.pause(5); }
+                    while (enc < (encoderM2 + speed / k)) { basic.pause(5); }
                 }
                 else {
                     enc += encoderM2;
-                    while (enc > (encoderM2 + speed / 4)) { basic.pause(5); }
+                    while (enc > (encoderM2 + speed / k)) { basic.pause(5); }
                 }
             } else if (motor2 == 0) {
                 if (speed < 0) {
                     enc *= -1;
                     enc += encoderM3;
-                    while (enc < (encoderM3 + speed / 4)) { basic.pause(5); }
+                    while (enc < (encoderM3 + speed / k)) { basic.pause(5); }
                 }
                 else {
                     enc += encoderM3;
-                    while (enc > (encoderM3 + speed / 4)) { basic.pause(5); }
+                    while (enc > (encoderM3 + speed / k)) { basic.pause(5); }
                 }
             }
             encoderOff(motor2); // если нужно непрерывно считать энкодеры, то это закомментировать
@@ -779,6 +791,18 @@ namespace YM3_motor {
             enc += Math.abs(rotations) * 360 + Math.abs(degrees);
         }
 
+        let k1 = 1;
+        if (Math.abs(speed1) >= 20 && Math.abs(speed1) <= 42)
+            k1 = 2;
+        else if (Math.abs(speed1) <= 19)
+            k1 = 4;
+
+        let k2 = 1;
+        if (Math.abs(speed2) >= 20 && Math.abs(speed2) <= 42)
+            k2 = 2;
+        else if (Math.abs(speed2) <= 19)
+            k2 = 4;
+
         if (Math.abs(speed1) >= Math.abs(speed2)) {
             initEncoder(motor1);
             MotorRun(motor1, speed1);
@@ -788,21 +812,21 @@ namespace YM3_motor {
                 if (speed1 < 0) {
                     enc *= -1;
                     enc += encoderM1;
-                    while (enc < (encoderM1 + speed1 / 4)) { basic.pause(5); }
+                    while (enc < (encoderM1 + speed1 / k1)) { basic.pause(5); }
                 }
                 else {
                     enc += encoderM1;
-                    while (enc > (encoderM1 + speed1 / 4)) { basic.pause(5); }
+                    while (enc > (encoderM1 + speed1 / k1)) { basic.pause(5); }
                 }
             } else if (motor1 == 2) {
                 if (speed1 < 0) {
                     enc *= -1;
                     enc += encoderM2;
-                    while (enc < (encoderM2 + speed1 / 4)) { basic.pause(5); }
+                    while (enc < (encoderM2 + speed1 / k1)) { basic.pause(5); }
                 }
                 else {
                     enc += encoderM2;
-                    while (enc > (encoderM2 + speed1 / 4)) { basic.pause(5); }
+                    while (enc > (encoderM2 + speed1 / k1)) { basic.pause(5); }
                 }
             }
             encoderOff(motor1); // если нужно непрерывно считать энкодеры, то это закомментировать
@@ -815,21 +839,21 @@ namespace YM3_motor {
                 if (speed2 < 0) {
                     enc *= -1;
                     enc += encoderM2;
-                    while (enc < (encoderM2 + speed2 / 4)) { basic.pause(5); }
+                    while (enc < (encoderM2 + speed2 / k2)) { basic.pause(5); }
                 }
                 else {
                     enc += encoderM2;
-                    while (enc > (encoderM2 + speed2 / 4)) { basic.pause(5); }
+                    while (enc > (encoderM2 + speed2 / k2)) { basic.pause(5); }
                 }
             } else if (motor2 == 0) {
                 if (speed2 < 0) {
                     enc *= -1;
                     enc += encoderM3;
-                    while (enc < (encoderM3 + speed2 / 4)) { basic.pause(5); }
+                    while (enc < (encoderM3 + speed2 / k2)) { basic.pause(5); }
                 }
                 else {
                     enc += encoderM3;
-                    while (enc > (encoderM3 + speed2 / 4)) { basic.pause(5); }
+                    while (enc > (encoderM3 + speed2 / k2)) { basic.pause(5); }
                 }
             }
             encoderOff(motor2); // если нужно непрерывно считать энкодеры, то это закомментировать
