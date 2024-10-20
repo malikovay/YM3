@@ -302,8 +302,8 @@ namespace YM3_motor {
             motorPWM = true;
         } else {
             motorPWM = false;
-            if (speed > 0) speed = Math.map(speed, 42, 100, 900, 4095); //устраняется мертвая зона мотора около 0
-            else if (speed < 0) speed = Math.map(speed, -42, -100, -900, -4095);
+            if (speed > 0) speed = Math.map(speed, 42, 100, 850, 4095); //устраняется мертвая зона мотора около 0
+            else if (speed < 0) speed = Math.map(speed, -42, -100, -850, -4095);
 
             if (speed > 4095) speed = 4095;
             if (speed < -4095) speed = -4095;
