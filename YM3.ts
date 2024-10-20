@@ -25,19 +25,6 @@ namespace YM3_motor {
     let initEncoderM2 = false
     let initEncoderM3 = false
 
-    let initM1 = false
-    let initM2 = false
-    let initM3 = false
-    let initM = false
-
-    let encoderM1target = 0;
-    let encoderM2target = 0;
-    let encoderM3target = 0;
-
-    let encoderM1step = 0;
-    let encoderM2step = 0;
-    let encoderM3step = 0;
-
     let encoderM1 = 0
     let encoderM2 = 0
     let encoderM3 = 0
@@ -243,29 +230,6 @@ namespace YM3_motor {
         else servo8 = angle;
     }
 
-    /*
-    function MotorRun_(index: enMotorsAll, angle: number): void {
-
-        if (speed > 0) speed = Math.map(speed, 1, 100, 900, 4095); //устраняется мертвая зона мотора около 0
-        else if (speed < 0) speed = Math.map(speed, -1, -100, -900, -4095);
-
-        if (speed > 4095) speed = 4095;
-        if (speed < -4095) speed = -4095;
-
-        let a = index
-        let b = index + 1
-        if (index == 2) b++;
-
-        if (speed >= 0) {
-            setPwm(a, 0, speed)
-            setPwm(b, 0, 0)
-        } else {
-            setPwm(a, 0, 0)
-            setPwm(b, 0, -speed)
-        }
-    }
-    */
-
     //% block="Мотор по мощности %index|%speed\\%" blockGap=8
     //% weight=99
     //% group="Мотор"
@@ -285,57 +249,54 @@ namespace YM3_motor {
         if (speed > 100) speed = 100;
         if (speed < -100) speed = -100;
 
-        initEncoder(index);
-
+        let a, b;
         if (index == 5) {
             speed *= invertM1;
-            initM1 = true;
-            encoderM1step = speed * 1.8;  // за 1 секунду вал мотора делает поворот на 9 градусов при мощности 1%
-            encoderM1target = encoderM1
+            a = 6, b = 5;
         } else if (index == 2) {
             speed *= invertM2;
-            initM2 = true;
-            encoderM2step = speed * 1.8;
-            encoderM2target = encoderM2
+            a = 2, b = 4;
         } else {
             speed *= invertM3;
-            initM3 = true;
-            encoderM3step = speed * 1.8;
-            encoderM3target = encoderM3
+            a = 1, b = 0;
         }
 
-        if (!initM) {
-            initM = true;
-            loops.everyInterval(200, function () {
-                if (initM1) {
-                    encoderM1target += encoderM1step;
-                }
-                if (initM2) {
-                    encoderM2target += encoderM2step;
-                } 
-                if (initM3) {
-                    encoderM3target += encoderM3step;
-                }
-            })
-            basic.forever(function () {
-                if (initM1) {
-                    let p = (encoderM1target - encoderM1) * 3.44;
-                    if (p > 3095) p = 3095
-                    if (p < -3095) p = -3095
+        if (Math.abs(speed) <= 41 && speed != 0) {
+            let t1, t2, i;
+            if (Math.abs(speed) >= 2 && Math.abs(speed) <= 4)
+                t1 = 40, t2 = 960, i = 1700 + 300*(speed-1);
+            else if (Math.abs(speed) == 5)
+                t1 = 40, t2 = 960, i = 3100;
+            else if (Math.abs(speed) >= 6 && Math.abs(speed) <= 10)
+                t1 = 20, t2 = 80, i = 1300 + 25*(speed - 6);
+            else if (Math.abs(speed) >= 11 && Math.abs(speed) <= 41)
+                t1 = 20, t2 = 80, i = 1400 + 46.667*(speed - 10);
 
-                    if (p > 10) {
-                        setPwm(6, 0, p + 1000)
-                        setPwm(5, 0, 0)
-                    } else if (p < -10) {
-                        setPwm(6, 0, 0)
-                        setPwm(5, 0, -p + 1000)
-                    } else {
-                        setPwm(6, 0, 0)
-                        setPwm(5, 0, 0)
-                    }
-                }
-                basic.pause(2);
-            })
+            if (speed >= 0) {
+                setPwm(a, 0, i)
+                setPwm(b, 0, 0)
+            } else {
+                setPwm(a, 0, 0)
+                setPwm(b, 0, -i)
+            }
+            basic.pause(t1);
+            setPwm(a, 0, 0)
+            setPwm(b, 0, 0)
+            basic.pause(t2);
+        } else {
+            if (speed > 0) speed = Math.map(speed, 42, 100, 900, 4095); //устраняется мертвая зона мотора около 0
+            else if (speed < 0) speed = Math.map(speed, -42, -100, -900, -4095);
+
+            if (speed > 4095) speed = 4095;
+            if (speed < -4095) speed = -4095;
+
+            if (speed >= 0) {
+                setPwm(a, 0, speed)
+                setPwm(b, 0, 0)
+            } else {
+                setPwm(a, 0, 0)
+                setPwm(b, 0, -speed)
+            }
         }
     }
 
@@ -867,11 +828,12 @@ namespace YM3_motor {
         if (!initialized) {
             initPCA9685()
         }
+        let a = index;
+        let b = index + 1;
+        if (index == 2) b++;
+
         if (l == 1) {
-            if (index != 1) {
-                let a = index;
-                let b = index + 1;
-                if (index == 2) b++;
+            if (index != 1) {               
                 setPwm(a, 0, 4095)
                 setPwm(b, 0, 4095)
             } else {
@@ -886,11 +848,15 @@ namespace YM3_motor {
         }
 
         if (index != 1) {
-            MotorRun(index, 0);
+            setPwm(a, 0, 0)
+            setPwm(b, 0, 0)
         } else {
-            MotorRun(5, 0);
-            MotorRun(2, 0);
-            MotorRun(0, 0);
+            setPwm(5, 0, 0)
+            setPwm(6, 0, 0)
+            setPwm(2, 0, 0)
+            setPwm(4, 0, 0)
+            setPwm(0, 0, 0)
+            setPwm(1, 0, 0)
         }
     }
 
@@ -922,8 +888,10 @@ namespace YM3_motor {
             basic.pause(200)
         }
 
-        MotorRun(motor1_a, 0);
-        MotorRun(motor2_a, 0);
+        setPwm(motor1_a, 0, 0)
+        setPwm(motor1_b, 0, 0)
+        setPwm(motor2_a, 0, 0)
+        setPwm(motor2_b, 0, 0)
     }
 
     //% block="Включение/обнуление энкодера %index" blockGap=8
@@ -968,7 +936,7 @@ namespace YM3_motor {
         }
         else {
             initEncoderM3 = false;
-            pins.digitalWritePin(DigitalPin.P9, 1) //отключает подписку на onPulsed
+            pins.digitalWritePin(DigitalPin.P10, 1) //отключает подписку на onPulsed
         }
     }
 
