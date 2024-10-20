@@ -20,6 +20,11 @@ namespace YM3_motor {
     const PRESCALE = 0xFE
 
     let initialized = false
+    let initializedMotor = false;
+    let motorPWM = false;
+
+    let a_ = 10, b_ = 11;
+    let t1_ = 0, t2_ = 0, pwm_ = 0, speed_ = 0;
 
     let initEncoderM1 = false
     let initEncoderM2 = false
@@ -142,6 +147,27 @@ namespace YM3_motor {
         initialized = true
     }
 
+    function initMotor(): void {
+        initializedMotor = true;
+        basic.forever(function () {
+            if (motorPWM) {
+                if (speed_ >= 0) {
+                    setPwm(a_, 0, pwm_)
+                    setPwm(b_, 0, 0)
+                } else {
+                    setPwm(a_, 0, 0)
+                    setPwm(b_, 0, pwm_)
+                }
+                basic.pause(t1_);
+                setPwm(a_, 0, 0)
+                setPwm(b_, 0, 0)
+                basic.pause(t2_);
+            } else {
+                basic.pause(200);
+            }
+        })
+    }
+
     function initEncoder(index: enMotorsAll): void {
         if (index == 1) {
             initEncoder(5);
@@ -245,45 +271,37 @@ namespace YM3_motor {
 
         if (!initialized)
             initPCA9685();
+        if (!initializedMotor)
+            initMotor();
 
         if (speed > 100) speed = 100;
         if (speed < -100) speed = -100;
 
-        let a, b;
         if (index == 5) {
             speed *= invertM1;
-            a = 6, b = 5;
+            a_ = 6, b_ = 5;
         } else if (index == 2) {
             speed *= invertM2;
-            a = 2, b = 4;
+            a_ = 4, b_ = 2;
         } else {
             speed *= invertM3;
-            a = 1, b = 0;
+            a_ = 0, b_ = 1;
         }
 
         if (Math.abs(speed) <= 41 && speed != 0) {
-            let t1, t2, i;
             if (Math.abs(speed) >= 2 && Math.abs(speed) <= 4)
-                t1 = 40, t2 = 960, i = 1700 + 300*(speed-1);
+                t1_ = 40, t2_ = 960, pwm_ = 1700 + 300 * (Math.abs(speed)-1);
             else if (Math.abs(speed) == 5)
-                t1 = 40, t2 = 960, i = 3100;
+                t1_ = 40, t2_ = 960, pwm_ = 3100;
             else if (Math.abs(speed) >= 6 && Math.abs(speed) <= 10)
-                t1 = 20, t2 = 80, i = 1300 + 25*(speed - 6);
-            else if (Math.abs(speed) >= 11 && Math.abs(speed) <= 41)
-                t1 = 20, t2 = 80, i = 1400 + 46.667*(speed - 10);
+                t1_ = 20, t2_ = 80, pwm_ = 1300 + 25 * (Math.abs(speed) - 6);
+            else
+                t1_ = 20, t2_ = 80, pwm_ = 1400 + 46.667 * (Math.abs(speed) - 10);
 
-            if (speed >= 0) {
-                setPwm(a, 0, i)
-                setPwm(b, 0, 0)
-            } else {
-                setPwm(a, 0, 0)
-                setPwm(b, 0, -i)
-            }
-            basic.pause(t1);
-            setPwm(a, 0, 0)
-            setPwm(b, 0, 0)
-            basic.pause(t2);
+            speed_ = speed;
+            motorPWM = true;
         } else {
+            motorPWM = false;
             if (speed > 0) speed = Math.map(speed, 42, 100, 900, 4095); //устраняется мертвая зона мотора около 0
             else if (speed < 0) speed = Math.map(speed, -42, -100, -900, -4095);
 
@@ -291,11 +309,11 @@ namespace YM3_motor {
             if (speed < -4095) speed = -4095;
 
             if (speed >= 0) {
-                setPwm(a, 0, speed)
-                setPwm(b, 0, 0)
+                setPwm(a_, 0, speed)
+                setPwm(b_, 0, 0)
             } else {
-                setPwm(a, 0, 0)
-                setPwm(b, 0, -speed)
+                setPwm(a_, 0, 0)
+                setPwm(b_, 0, -speed)
             }
         }
     }
@@ -832,6 +850,8 @@ namespace YM3_motor {
         let b = index + 1;
         if (index == 2) b++;
 
+        motorPWM = false;
+
         if (l == 1) {
             if (index != 1) {               
                 setPwm(a, 0, 4095)
@@ -868,6 +888,8 @@ namespace YM3_motor {
         if (!initialized) {
             initPCA9685()
         }
+        motorPWM = false;
+
         let motor1_a, motor1_b;
         let motor2_a, motor2_b;
         if (motor == 1) {
