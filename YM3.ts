@@ -285,7 +285,7 @@ namespace YM3_motor {
             a_ = 4, b_ = 2;
         } else {
             speed *= invertM3;
-            a_ = 0, b_ = 1;
+            a_ = 1, b_ = 0;
         }
 
         if (Math.abs(speed) <= 41 && speed != 0) {
